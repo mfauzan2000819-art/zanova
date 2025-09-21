@@ -1,0 +1,1472 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Manajemen Karyawan - Warung Haji Maki Martapura</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+            background-attachment: fixed;
+            color: #e0e0e0;
+            line-height: 1.6;
+            overflow-x: hidden;
+            position: relative;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0;
+        }
+        
+        /* Header Futuristic (dikecilkan) */
+        header {
+            background: rgba(12, 12, 12, 0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 212, 255, 0.3);
+            box-shadow: 0 4px 30px rgba(0, 212, 255, 0.1);
+            padding: 10px 20px; /* Dikecilkan dari 15px 30px */
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            display: none;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            font-family: 'Orbitron', monospace;
+            font-size: 1.5em; /* Dikecilkan dari 1.8em */
+            font-weight: 900;
+            background: linear-gradient(135deg, #00d4ff, #7b2cbf);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .logo i { margin-right: 10px; color: #00d4ff; text-shadow: 0 0 10px #00d4ff; }
+        .roles {
+            font-size: 0.7em; /* Dikecilkan dari 0.8em */
+            opacity: 1; /* Naikkan opacity agar lebih terlihat */
+            margin-top: 5px;
+            font-family: 'Roboto', sans-serif;
+            color: #00d4ff; /* Base color untuk kontras */
+            background: linear-gradient(135deg, #00d4ff, #7b2cbf); /* Gradient neon agar nyatu dengan logo */
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 8px rgba(0, 212, 255, 0.5); /* Glow lebih kuat untuk visibilitas */
+        }
+        .roles small {
+            color: #00d4ff; /* Fallback jika gradient tidak support */
+        }
+        .admin-btn {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00d4ff, #7b2cbf);
+            border: 2px solid rgba(0, 212, 255, 0.5);
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            transition: all 0.3s;
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.3);
+        }
+        .admin-btn:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.6);
+        }
+        .admin-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #ff4757;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.7em;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 10px #ff4757;
+        }
+        
+        /* Sidebar Futuristic (height dikecilkan sedikit) */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 70px; /* Dikecilkan dari 80px */
+            width: 280px;
+            height: calc(100vh - 70px); /* Sesuaikan dengan top */
+            background: rgba(26, 26, 46, 0.95);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(0, 212, 255, 0.3);
+            box-shadow: 2px 0 30px rgba(0, 212, 255, 0.1);
+            padding: 20px 0;
+            overflow-y: auto;
+            transition: transform 0.3s ease;
+            z-index: 999;
+            display: none;
+        }
+        .sidebar.active { display: block; transform: translateX(0); }
+        .sidebar ul {
+            list-style: none;
+        }
+        .sidebar li {
+            padding: 15px 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-left: 3px solid transparent;
+            font-family: 'Orbitron', monospace;
+        }
+        .sidebar li:hover, .sidebar li.active {
+            background: rgba(0, 212, 255, 0.1);
+            border-left-color: #00d4ff;
+            color: #00d4ff;
+            text-shadow: 0 0 5px #00d4ff;
+        }
+        .sidebar li i { margin-right: 10px; width: 20px; color: #7b2cbf; }
+        .announcements {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(26, 26, 46, 0.7);
+            border-radius: 10px;
+            border: 1px solid rgba(123, 44, 191, 0.3);
+        }
+        .announcement-item {
+            background: rgba(12, 12, 12, 0.8);
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 212, 255, 0.1);
+            font-size: 0.9em;
+            border-left: 3px solid #7b2cbf;
+            position: relative; /* Untuk posisi tombol hapus */
+        }
+        .announcement-time { color: #a0a0a0; font-size: 0.8em; }
+        .delete-ann-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            padding: 4px 8px;
+            font-size: 10px;
+            background: linear-gradient(135deg, #ff4757, #ff6b7a);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            display: none; /* Default hidden, muncul on hover jika admin */
+            box-shadow: 0 2px 5px rgba(255, 71, 87, 0.3);
+            transition: all 0.2s;
+        }
+        .delete-ann-btn:hover { 
+            transform: scale(1.1);
+            box-shadow: 0 4px 10px rgba(255, 71, 87, 0.5);
+        }
+        .announcement-item:hover .delete-ann-btn { display: block; } /* Muncul on hover */
+        
+        /* Main Content (padding dikecilkan) */
+        .main-content {
+            margin-left: 280px;
+            padding: 20px; /* Dikecilkan dari 30px */
+            min-height: 100vh;
+            transition: margin-left 0.3s;
+        }
+        .page {
+            display: none;
+            min-height: 100vh;
+            align-items: center;
+            justify-content: center;
+        }
+        .page.active { display: flex; }
+        
+        /* Forms Futuristic */
+        .form-container {
+            background: rgba(26, 26, 46, 0.9);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            padding: 50px;
+            border-radius: 20px;
+            box-shadow: 0 8px 32px rgba(0, 212, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+            animation: slideIn 0.5s ease-out;
+            font-family: 'Orbitron', monospace;
+        }
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #00d4ff;
+            font-family: 'Orbitron', sans-serif;
+        }
+        input[type="text"], input[type="date"], input[type="tel"], input[type="password"], textarea, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            border-radius: 10px;
+            font-size: 15px;
+            transition: all 0.3s;
+            background: rgba(12, 12, 12, 0.8);
+            color: #e0e0e0;
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+        input:focus, textarea:focus, select:focus {
+            border-color: #00d4ff;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 212, 255, 0.2), 0 0 10px rgba(0, 212, 255, 0.3);
+        }
+        .radio-group, .checkbox-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .radio-item, .checkbox-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: rgba(12, 12, 12, 0.6);
+            border-radius: 8px;
+            transition: all 0.3s;
+            border: 1px solid rgba(123, 44, 191, 0.2);
+        }
+        .radio-item:hover, .checkbox-item:hover { 
+            background: rgba(0, 212, 255, 0.1); 
+            border-color: #00d4ff;
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.2);
+        }
+        button {
+            background: linear-gradient(135deg, #00d4ff, #7b2cbf);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s;
+            margin: 5px;
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+            font-family: 'Orbitron', monospace;
+            position: relative;
+            overflow: hidden;
+        }
+        button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        button:hover::before { left: 100%; }
+        button:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 6px 20px rgba(0, 212, 255, 0.5), 0 0 20px rgba(0, 212, 255, 0.3);
+        }
+        button.success { background: linear-gradient(135deg, #00ff88, #00d4ff); box-shadow: 0 4px 15px rgba(0, 255, 136, 0.3); }
+        button.danger { background: linear-gradient(135deg, #ff4757, #ff6b7a); box-shadow: 0 4px 15px rgba(255, 71, 87, 0.3); }
+        
+       /* Animasi login */
+        .loading { display: none; text-align: center; margin: 30px 0; }
+        .spinner {
+            border: 4px solid rgba(0, 212, 255, 0.3);
+            border-top: 4px solid #00d4ff;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .success-message {
+            display: none;
+            font-size: 2.5em;
+            color: #00ff88;
+            animation: successAnim 1s ease-in-out;
+            margin: 20px 0;
+            text-shadow: 0 0 10px #00ff88;
+        }
+        @keyframes successAnim {
+            0% { opacity: 0; transform: scale(0.5) rotate(180deg); }
+            100% { opacity: 1; transform: scale(1) rotate(0deg); }
+        }
+        .error-message { color: #ff4757; font-size: 14px; margin-top: 5px; display: none; text-shadow: 0 0 5px #ff4757; }
+        
+        /* Admin Modal Futuristic */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7); /* Diperbaiki dari rgba(25, 0, 255, 0.7) */
+            backdrop-filter: blur(10px);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            animation: fadeIn 0.3s;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: rgba(26, 26, 46, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 212, 255, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            width: 90%;
+            max-width: 600px;
+            text-align: center;
+            animation: slideUp 0.4s ease-out;
+            font-family: 'Orbitron', monospace;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { transform: translateY(50px); } to { transform: translateY(0); } }
+        .admin-panel {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+            overflow-y: auto;
+        }
+        .admin-panel.active { display: flex; }
+        .admin-section {
+            background: rgba(12, 12, 12, 0.8);
+            margin: 20px;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(123, 44, 191, 0.3);
+        }
+        .chat-list, .announcement-admin-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 10px;
+            padding: 10px;
+            background: rgba(26, 26, 46, 0.7);
+        }
+        .chat-message, .announcement-admin-item {
+            padding: 10px;
+            margin-bottom: 10px;
+            background: rgba(12, 12, 12, 0.8);
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 212, 255, 0.1);
+            border-left: 3px solid #7b2cbf;
+            position: relative;
+        }
+        .chat-message.admin, .announcement-admin-item { background: rgba(123, 44, 191, 0.2); border-left-color: #00d4ff; }
+        .delete-chat-btn, .delete-ann-admin-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            padding: 4px 8px;
+            font-size: 10px;
+            background: linear-gradient(135deg, #ff4757, #ff6b7a);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(255, 71, 87, 0.3);
+            transition: all 0.2s;
+        }
+        .delete-chat-btn:hover, .delete-ann-admin-btn:hover { 
+            transform: scale(1.1);
+            box-shadow: 0 4px 10px rgba(255, 71, 87, 0.5);
+        }
+        
+        /* Employee List Futuristic */
+        .employee-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 20px;
+        }
+        .employee-card {
+            background: rgba(26, 26, 46, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 8px 32px rgba(0, 212, 255, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+            text-align: center;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        .employee-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #00d4ff, #7b2cbf);
+            box-shadow: 0 0 10px rgba(0, 212, 255, 0.5);
+        }
+        .employee-card:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 12px 40px rgba(0, 212, 255, 0.3), 0 0 20px rgba(0, 212, 255, 0.2);
+        }
+        .employee-photo {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00d4ff, #7b2cbf);
+            margin: 0 auto 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2em;
+            border: 3px solid rgba(255,255,255,0.2);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.5);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 15px rgba(0, 212, 255, 0.5); }
+            50% { box-shadow: 0 0 25px rgba(0, 212, 255, 0.8); }
+        }
+        .employee-name {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #e0e0e0;
+            font-family: 'Orbitron', monospace;
+        }
+        .employee-position {
+            color: #a0a0a0;
+            font-size: 0.95em;
+            margin-bottom: 15px;
+        }
+        .status {
+            padding: 8px 16px;
+            border-radius: 25px;
+            font-size: 0.85em;
+            font-weight: 500;
+            margin: 10px 0;
+            display: inline-block;
+            font-family: 'Orbitron', sans-serif;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        .status.active { background: linear-gradient(135deg, rgba(0, 255, 136, 0.2), rgba(0, 212, 255, 0.2)); color: #00ff88; border: 1px solid #00ff88; }
+        .status.inactive { background: linear-gradient(135deg, rgba(255, 71, 87, 0.2), rgba(255, 107, 122, 0.2)); color: #ff4757; border: 1px solid #ff4757; }
+        .status.archived { background: linear-gradient(135deg, rgba(255, 193, 7, 0.2), rgba(255, 234, 167, 0.2)); color: #ffc107; border: 1px solid #ffc107; }
+        .employee-info {
+            font-size: 0.9em;
+            color: #a0a0a0;
+            margin: 5px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .employee-info i { margin-right: 5px; color: #00d4ff; }
+        
+        /* Toast Notifications Futuristic */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #00ff88, #00d4ff);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 212, 255, 0.3), 0 0 20px rgba(0, 212, 255, 0.2);
+            display: none;
+            align-items: center;
+            z-index: 3000;
+            animation: toastSlideIn 0.3s ease-out;
+            font-family: 'Orbitron', monospace;
+        }
+        .toast.show { display: flex; }
+        .toast i { margin-right: 10px; }
+        @keyframes toastSlideIn {
+            from { transform: translateX(100%) rotate(-5deg); opacity: 0; }
+            to { transform: translateX(0) rotate(0); opacity: 1; }
+        }
+        .toast.error {
+            background: linear-gradient(135deg, #ff4757, #ff6b7a);
+            box-shadow: 0 4px 20px rgba(255, 71, 87, 0.3), 0 0 20px rgba(255, 71, 87, 0.2);
+        }
+        .toast.auto-hide {
+            animation: toastAutoHide 3s ease-out forwards;
+        }
+        @keyframes toastAutoHide {
+            0% { transform: translateX(0); opacity: 1; }
+            80% { transform: translateX(0); opacity: 1; }
+            100% { transform: translateX(100%) rotate(5deg); opacity: 0; }
+        }
+        
+        /* Tabs dan Navigation Futuristic */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        .tab-btn {
+            padding: 12px 25px;
+            background: rgba(12, 12, 12, 0.8);
+            border: 2px solid rgba(0, 212, 255, 0.3);
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+            color: #e0e0e0;
+            font-family: 'Orbitron', monospace;
+        }
+        .tab-btn.active, .tab-btn:hover {
+            background: linear-gradient(135deg, #00d4ff, #7b2cbf);
+            color: white;
+            border-color: #00d4ff;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 212, 255, 0.3);
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            header { padding: 8px 15px; } /* Lebih kecil untuk mobile */
+            .sidebar { 
+                transform: translateX(-100%); 
+                width: 100%; 
+                top: 0;
+                height: 100vh;
+            }
+            .sidebar.active { transform: translateX(0); }
+            .main-content { margin-left: 0; padding: 15px; } /* Padding lebih kecil */
+            .form-container { padding: 30px 20px; max-width: 90%; }
+            .employee-grid { grid-template-columns: 1fr; gap: 15px; }
+            .tabs { flex-direction: column; align-items: center; }
+            .modal-content { padding: 20px; margin: 20px; }
+            .admin-panel { flex-direction: column; }
+            .toast { bottom: 10px; right: 10px; left: 10px; right: 10px; }
+            .delete-ann-btn { font-size: 12px; padding: 6px 10px; } /* Lebih besar di mobile */
+        }
+        
+        /* Additional Animations */
+        .fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .position-checkbox {
+            animation: fadeInDelay 0.6s ease-in forwards;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        .position-checkbox:nth-child(1) { animation-delay: 0.1s; }
+        .position-checkbox:nth-child(2) { animation-delay: 0.2s; }
+        .position-checkbox:nth-child(3) { animation-delay: 0.3s; }
+        .position-checkbox:nth-child(4) { animation-delay: 0.4s; }
+        .position-checkbox:nth-child(5) { animation-delay: 0.5s; }
+        .position-checkbox:nth-child(6) { animation-delay: 0.6s; }
+        .position-checkbox:nth-child(7) { animation-delay: 0.7s; }
+        @keyframes fadeInDelay {
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header (dengan perubahan roles) -->
+    <header id="mainHeader">
+        <div class="logo">
+            <i class="fas fa-store"></i>
+            Warung Haji Maki Martapura
+            <div class="roles">
+                <small>Pemilik: Junairah | Wakil: Haji Maki | Admin Utama: Muhammad Fauzan (Pembuat Web)</small>
+            </div>
+        </div>
+        <button class="admin-btn" id="adminBtn" onclick="openAdminModal()">
+            <i class="fas fa-user-shield"></i>
+            <div class="admin-badge" id="adminBadge">!</div>
+        </button>
+    </header>
+
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <ul>
+            <li onclick="showTab('active')" class="active"><i class="fas fa-users"></i> Karyawan Aktif</li>
+            <li onclick="showTab('inactive')"><i class="fas fa-user-slash"></i> Karyawan Non Aktif</li>
+            <li onclick="showTab('archived')"><i class="fas fa-archive"></i> Arsip Karyawan</li>
+            <li onclick="goToFormPage()"><i class="fas fa-user-plus"></i> Tambah Karyawan</li>
+        </ul>
+        <div class="announcements" id="announcementsList">
+            <h4><i class="fas fa-bullhorn"></i> Pengumuman</h4>
+            <!-- Announcements akan dimuat di sini -->
+        </div>
+    </nav>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage"></span>
+    </div>
+
+    <!-- Login Page -->
+    <div class="container page active" id="loginPage">
+        <div class="form-container">
+            <h2><i class="fas fa-sign-in-alt"></i> Login Sistem Karyawan</h2>
+            <div class="form-group">
+                            <label for="companyName">Nama Perusahaan</label>
+            <input type="text" id="companyName" placeholder="Masukkan nama perusahaan">
+            <div class="error-message" id="companyError"></div>
+        </div>
+        <div class="form-group">
+            <label for="password">Sandi Perusahaan</label>
+            <input type="password" id="password" placeholder="Masukkan sandi perusahaan">
+            <div class="error-message" id="passwordError"></div>
+        </div>
+        <button onclick="handleLogin()">Masuk</button>
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Memverifikasi...</p>
+        </div>
+        <div class="success-message" id="successMessage">SUKSESS!!</div>
+    </div>
+</div>
+
+<!-- Form Employee Page -->
+<div class="container page" id="formPage">
+    <div class="form-container">
+        <h2><i class="fas fa-user-plus"></i> Tambahkan Karyawan Baru</h2>
+        <div class="form-group">
+            <label for="nama">Nama Lengkap</label>
+            <input type="text" id="nama" placeholder="Nama karyawan">
+            <div class="error-message" id="namaError"></div>
+        </div>
+        <div class="form-group">
+            <label for="tglLahir">Tanggal Lahir</label>
+            <input type="date" id="tglLahir">
+            <div class="error-message" id="tglLahirError"></div>
+        </div>
+        <div class="form-group">
+            <label>Jenis Kelamin</label>
+            <div class="radio-group">
+                <div class="radio-item">
+                    <input type="radio" name="jenisKelamin" value="Laki-laki" id="male">
+                    <label for="male">Laki-laki</label>
+                </div>
+                <div class="radio-item">
+                    <input type="radio" name="jenisKelamin" value="Perempuan" id="female">
+                    <label for="female">Perempuan</label>
+                </div>
+            </div>
+            <div class="error-message" id="jenisKelaminError"></div>
+        </div>
+        <div class="form-group">
+            <label for="noPonsel">Nomor Ponsel</label>
+            <input type="tel" id="noPonsel" placeholder="08123456789">
+            <div class="error-message" id="noPonselError"></div>
+        </div>
+        <div class="form-group">
+            <label>Pilih Posisi Kerja (Maksimal 5)</label>
+            <div class="checkbox-group" id="positionOptions">
+                <div class="checkbox-item position-checkbox">
+                    <input type="checkbox" value="Pengolah Ikan dan Ayam">
+                    <label>Pengolah Ikan dan Ayam</label>
+                </div>
+                <div class="checkbox-item position-checkbox">
+                    <input type="checkbox" value="Pelayanan Pelanggan">
+                    <label>Pelayanan Pelanggan</label>
+                </div>
+                <div class="checkbox-item position-checkbox">
+                    <input type="checkbox" value="Pencuci Piring">
+                    <label>Pencuci Piring</label>
+                </div>
+                <div class="checkbox-item position-checkbox">
+                    <input type="checkbox" value="Pembikin Minuman">
+                    <label>Pembikin Minuman</label>
+                </div>
+                <div class="checkbox-item position-checkbox">
+                    <input type="checkbox" value="Membersihkan & Mengangkat Piring Kotor">
+                    <label>Membersihkan & Mengangkat Piring Kotor</label>
+                </div>
+                <div class="checkbox-item position-checkbox">
+                    <input type="checkbox" value="Menyapu Lantai">
+                    <label>Menyapu Lantai</label>
+                </div>
+                <div class="checkbox-item position-checkbox">
+                    <input type="checkbox" value="Membersihkan Setiap Piring & Gelas Basah">
+                    <label>Membersihkan Setiap Piring & Gelas Basah</label>
+                </div>
+            </div>
+            <div class="error-message" id="positionsError"></div>
+        </div>
+        <button onclick="addEmployee()" class="success">Simpan Karyawan</button>
+        <button onclick="goToMainPage()">Lihat Daftar Karyawan</button>
+    </div>
+</div>
+
+<!-- Main Page -->
+<div class="main-content page" id="mainPage">
+    <div class="tabs">
+        <button class="tab-btn active" onclick="showTab('active')"><i class="fas fa-users"></i> Karyawan Aktif</button>
+        <button class="tab-btn" onclick="showTab('inactive')"><i class="fas fa-user-slash"></i> Karyawan Non Aktif</button>
+        <button class="tab-btn" onclick="showTab('archived')"><i class="fas fa-archive"></i> Arsip Karyawan</button>
+        <button class="tab-btn success" onclick="goToFormPage()"><i class="fas fa-user-plus"></i> Tambah Karyawan</button>
+    </div>
+    <div id="activeTab" class="employee-grid"></div>
+    <div id="inactiveTab" class="employee-grid" style="display: none;"></div>
+    <div id="archivedTab" class="employee-grid" style="display: none;"></div>
+    <div style="text-align: center; margin-top: 40px;">
+        <button onclick="logout()" class="danger"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </div>
+</div>
+
+<!-- Admin Modal - Login Admin (dengan verifikasi nama + password) -->
+<div class="modal" id="adminModal">
+    <div class="modal-content">
+        <h3><i class="fas fa-shield-alt"></i> Khusus Admin Utama</h3>
+        <p>Masukkan nama dan sandi admin untuk akses kontrol penuh (hanya untuk Muhammad Fauzan).</p>
+        <div class="form-group" style="text-align: left; margin-bottom: 15px;">
+            <label for="adminName">Nama Admin</label>
+            <input type="text" id="adminName" placeholder="Masukkan nama admin (Muhammad Fauzan)">
+            <div class="error-message" id="adminNameError" style="margin-top: 5px;"></div>
+        </div>
+        <div class="form-group" style="text-align: left; margin-bottom: 20px;">
+            <label for="adminPassword">Sandi Admin</label>
+            <input type="password" id="adminPassword" placeholder="Masukkan sandi admin">
+            <div class="error-message" id="adminPasswordError" style="margin-top: 5px;"></div>
+        </div>
+        <button onclick="loginAdmin()">Masuk Admin</button>
+        <button onclick="closeAdminModal()" style="background: linear-gradient(135deg, #6c757d, #5a6268);">Batal</button>
+        <div class="error-message" id="adminError" style="margin-top: 10px;"></div>
+    </div>
+</div>
+
+<!-- Admin Panel Modal (dengan section kelola pengumuman baru) -->
+<div class="modal" id="adminPanelModal">
+    <div class="modal-content" style="max-width: 800px; height: 80vh; display: flex; flex-direction: column;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3><i class="fas fa-cog"></i> Panel Admin Utama - Kontrol Penuh (Muhammad Fauzan)</h3>
+            <button onclick="closeAdminPanel()" class="danger" style="padding: 5px 10px; font-size: 14px;"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="admin-panel active">
+            <!-- Broadcast Info / Announcement -->
+            <div class="admin-section">
+                <h4><i class="fas fa-bullhorn"></i> Broadcast Info ke Semua Karyawan</h4>
+                <textarea id="broadcastMessage" placeholder="Ketik pesan pengumuman..." rows="3"></textarea>
+                <button onclick="sendBroadcast()" class="success">Kirim Pengumuman</button>
+            </div>
+
+            <!-- Kelola Pengumuman (baru: lihat dan hapus semua announcements) -->
+            <div class="admin-section">
+                <h4><i class="fas fa-list"></i> Kelola Pengumuman (Hapus jika perlu)</h4>
+                <p style="font-size: 0.9em; color: #a0a0a0; margin-bottom: 10px;">Daftar semua pengumuman. Hapus untuk membersihkan data.</p>
+                <div class="announcement-admin-list" id="adminAnnouncementsList">
+                    <!-- Announcements akan dimuat di sini -->
+                </div>
+            </div>
+
+            <!-- Chat Pribadi -->
+            <div class="admin-section">
+                <h4><i class="fas fa-comments"></i> Chat Pribadi</h4>
+                <select id="chatEmployeeSelect">
+                    <option value="">Pilih Karyawan</option>
+                    <!-- Options akan dimuat dari employees -->
+                </select>
+                <textarea id="chatMessage" placeholder="Ketik pesan pribadi..." rows="3"></textarea>
+                <button onclick="sendPrivateChat()" class="success">Kirim Pesan</button>
+                <div class="chat-list" id="chatList"></div>
+            </div>
+
+            <!-- Info Berkala -->
+            <div class="admin-section">
+                <h4><i class="fas fa-clock"></i> Info Berkala</h4>
+                <textarea id="periodicInfo" placeholder="Info berkala (akan tampil otomatis)..." rows="2"></textarea>
+                <button onclick="addPeriodicInfo()" class="success">Tambah Info</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Konstanta
+    const COMPANY_NAME = "Warung Haji Maki Martapura";
+    const PASSWORD = "Jaya_Abadi_bersama";
+    const ADMIN_NAME = "Muhammad Fauzan"; // Verifikasi nama admin
+    const ADMIN_PASSWORD = "muhammadfauzan_manis_ganteng"; // Password baru untuk keamanan
+    
+    // Data dari localStorage
+    let employees = JSON.parse(localStorage.getItem('employees')) || [];
+    let announcements = JSON.parse(localStorage.getItem('announcements')) || [];
+    let privateChats = JSON.parse(localStorage.getItem('privateChats')) || {};
+    let isAdminLoggedIn = false;
+    let currentTab = 'active';
+    let unreadChats = 0;
+
+    // Inisialisasi
+    document.addEventListener('DOMContentLoaded', function() {
+        showPage('loginPage');
+        loadAnnouncements();
+        loadAdminAnnouncements(); // Load announcements di admin panel
+        updateAdminBadge();
+        
+        // Enter key untuk login
+        document.getElementById('password').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleLogin();
+        });
+        
+        // Batasi checkbox maksimal 5
+        document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
+            checkbox.addEventListener('change', () => {
+                const checked = document.querySelectorAll('input[type="checkbox"]:checked');
+                if (checked.length > 5) {
+                    checkbox.checked = false;
+                    showToast('Maksimal 5 posisi kerja!', 'error');
+                }
+            });
+        });
+        
+        // Load employees untuk chat select
+        loadChatEmployees();
+    });
+
+    // Fungsi navigasi halaman
+    function showPage(pageId) {
+        document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+        document.getElementById(pageId).classList.add('active');
+        if (pageId === 'mainPage') {
+            document.getElementById('mainHeader').style.display = 'flex';
+            document.getElementById('sidebar').classList.add('active');
+            loadEmployees();
+        } else {
+            document.getElementById('mainHeader').style.display = 'none';
+            document.getElementById('sidebar').classList.remove('active');
+        }
+    }
+
+    // Fungsi login (diperbaiki)
+    function handleLogin() {
+        const companyName = document.getElementById('companyName').value.trim();
+        const password = document.getElementById('password').value.trim();
+        let isValid = true;
+        
+        // Reset error messages
+        document.getElementById('companyError').style.display = 'none';
+        document.getElementById('passwordError').style.display = 'none';
+        
+        // Validasi input
+        if (!companyName) {
+            document.getElementById('companyError').textContent = 'Nama perusahaan harus diisi';
+            document.getElementById('companyError').style.display = 'block';
+            isValid = false;
+        }
+        if (!password) {
+            document.getElementById('passwordError').textContent = 'Sandi harus diisi';
+            document.getElementById('passwordError').style.display = 'block';
+            isValid = false;
+        }
+        
+        if (!isValid) return;
+        
+        // Tampilkan loading
+        document.getElementById('loading').style.display = 'block';
+        
+        // Simulasi proses login (2 detik)
+        setTimeout(() => {
+            document.getElementById('loading').style.display = 'none';
+            
+            if (companyName === COMPANY_NAME && password === PASSWORD) {
+                document.getElementById('successMessage').style.display = 'block';
+                setTimeout(() => {
+                    showPage('formPage');
+                    document.getElementById('successMessage').style.display = 'none';
+                    // Reset form login
+                    document.getElementById('companyName').value = '';
+                    document.getElementById('password').value = '';
+                }, 1500);
+            } else {
+                document.getElementById('passwordError').textContent = 'Nama perusahaan atau sandi salah!';
+                document.getElementById('passwordError').style.display = 'block';
+            }
+        }, 2000);
+    }
+
+    // Fungsi tambah karyawan (ditingkatkan dengan validasi umur)
+    function addEmployee() {
+        const nama = document.getElementById('nama').value.trim();
+        const tglLahir = document.getElementById('tglLahir').value;
+        const jenisKelamin = document.querySelector('input[name="jenisKelamin"]:checked')?.value || '';
+        const noPonsel = document.getElementById('noPonsel').value.trim();
+        const positions = Array.from(document.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
+        
+        let isValid = true;
+        
+        // Reset error messages
+        document.querySelectorAll('.error-message').forEach(el => el.style.display = 'none');
+        
+        // Validasi
+        if (!nama) {
+            document.getElementById('namaError').textContent = 'Nama harus diisi';
+            document.getElementById('namaError').style.display = 'block';
+            isValid = false;
+        }
+        if (!tglLahir) {
+            document.getElementById('tglLahirError').textContent = 'Tanggal lahir harus diisi';
+            document.getElementById('tglLahirError').style.display = 'block';
+            isValid = false;
+        } else {
+            // Validasi umur minimal 15 tahun
+            const birthDate = new Date(tglLahir);
+            const today = new Date();
+            let age = today.getFullYear() - birthDate.getFullYear();
+            const monthDiff = today.getMonth() - birthDate.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+                age--;
+            }
+           if (age < 15) {
+            document.getElementById('tglLahirError').textContent = 'Umur minimal 15 tahun';
+            document.getElementById('tglLahirError').style.display = 'block';
+           isValid = false;
+          }
+
+        }
+        if (!jenisKelamin) {
+            document.getElementById('jenisKelaminError').textContent = 'Jenis kelamin harus dipilih';
+            document.getElementById('jenisKelaminError').style.display = 'block';
+            isValid = false;
+        }
+        if (!noPonsel || !/^\d{10,13}$/.test(noPonsel.replace(/\D/g, ''))) {
+            document.getElementById('noPonselError').textContent = 'Nomor ponsel tidak valid (minimal 10 digit)';
+            document.getElementById('noPonselError').style.display = 'block';
+            isValid = false;
+        }
+        if (positions.length === 0) {
+            document.getElementById('positionsError').textContent = 'Pilih minimal 1 posisi kerja';
+            document.getElementById('positionsError').style.display = 'block';
+            isValid = false;
+        }
+        
+        if (!isValid) return;
+        
+        // Buat objek karyawan baru
+        const newEmployee = {
+            id: Date.now(),
+            nama: nama,
+            tglLahir: tglLahir,
+            jenisKelamin: jenisKelamin,
+            noPonsel: noPonsel,
+            positions: positions,
+            status: 'active',
+            lastLogin: new Date().toLocaleString('id-ID'),
+            lastActivity: 'Baru ditambahkan ke sistem pada ' + new Date().toLocaleString('id-ID')
+        };
+        
+        employees.push(newEmployee);
+        localStorage.setItem('employees', JSON.stringify(employees));
+        
+        // Reset form
+        document.getElementById('nama').value = '';
+        document.getElementById('tglLahir').value = '';
+        document.querySelectorAll('input[name="jenisKelamin"]').forEach(r => r.checked = false);
+        document.getElementById('noPonsel').value = '';
+        document.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.checked = false);
+        
+        showToast('Karyawan berhasil ditambahkan!', 'success');
+        loadChatEmployees(); // Update select chat
+    }
+
+    // Fungsi load employees untuk tampilan utama
+    function loadEmployees() {
+        const activeTab = document.getElementById('activeTab');
+        const inactiveTab = document.getElementById('inactiveTab');
+        const archivedTab = document.getElementById('archivedTab');
+        
+        // Kosongkan tabs
+        activeTab.innerHTML = '';
+        inactiveTab.innerHTML = '';
+        archivedTab.innerHTML = '';
+        
+        // Filter berdasarkan status
+        const activeEmployees = employees.filter(emp => emp.status === 'active');
+        const inactiveEmployees = employees.filter(emp => emp.status === 'inactive');
+        const archivedEmployees = employees.filter(emp => emp.status === 'archived');
+        
+        // Pesan jika kosong
+        if (activeEmployees.length === 0) activeTab.innerHTML = '<p style="text-align: center; grid-column: 1/-1; color: #a0a0a0; font-size: 1.2em;">Tidak ada karyawan aktif saat ini</p>';
+        if (inactiveEmployees.length === 0) inactiveTab.innerHTML = '<p style="text-align: center; grid-column: 1/-1; color: #a0a0a0; font-size: 1.2em;">Tidak ada karyawan non-aktif</p>';
+        if (archivedEmployees.length === 0) archivedTab.innerHTML = '<p style="text-align: center; grid-column: 1/-1; color: #a0a0a0; font-size: 1.2em;">Tidak ada karyawan di arsip</p>';
+        
+        // Render cards
+        activeEmployees.forEach(emp => activeTab.appendChild(createEmployeeCard(emp)));
+        inactiveEmployees.forEach(emp => inactiveTab.appendChild(createEmployeeCard(emp)));
+        archivedEmployees.forEach(emp => archivedTab.appendChild(createEmployeeCard(emp)));
+    }
+
+    // Fungsi buat employee card (ditingkatkan dengan admin controls)
+    function createEmployeeCard(employee) {
+        const card = document.createElement('div');
+        card.className = 'employee-card';
+        let adminControls = '';
+        if (isAdminLoggedIn) {
+            adminControls = `
+                <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: center;">
+                    <button onclick="toggleStatus(${employee.id})" class="danger" style="padding: 8px 15px; font-size: 14px;">
+                        <i class="fas fa-toggle-${employee.status === 'active' ? 'off' : 'on'}"></i> ${employee.status === 'active' ? 'Nonaktifkan' : 'Aktifkan'}
+                    </button>
+                    <button onclick="archiveEmployee(${employee.id})" class="success" style="padding: 8px 15px; font-size: 14px;">
+                        <i class="fas fa-archive"></i> Arsip
+                    </button>
+                </div>
+            `;
+        }
+        card.innerHTML = `
+            <div class="employee-photo">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="employee-name">${employee.nama}</div>
+            <div class="employee-position">${employee.positions.join(', ')}</div>
+            <span class="status ${employee.status}">${employee.status.charAt(0).toUpperCase() + employee.status.slice(1)}</span>
+            <div class="employee-info"><i class="fas fa-venus-mars"></i> ${employee.jenisKelamin}</div>
+            <div class="employee-info"><i class="fas fa-phone"></i> ${employee.noPonsel}</div>
+            <div class="employee-info"><i class="fas fa-calendar-alt"></i> Lahir: ${new Date(employee.tglLahir).toLocaleDateString('id-ID')}</div>
+            <div class="employee-info"><i class="fas fa-clock"></i> Login Terakhir: ${employee.lastLogin}</div>
+            <div class="employee-info"><i class="fas fa-info-circle"></i> ${employee.lastActivity}</div>
+            ${adminControls}
+        `;
+        return card;
+    }
+
+    // Fungsi show tab (diperbaiki untuk kompatibilitas onclick)
+    function showTab(tabName) {
+        currentTab = tabName;
+        // Cari tab-btn yang sesuai
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        tabButtons.forEach(btn => btn.classList.remove('active'));
+        // Jika dipanggil dari onclick, gunakan event.target
+        if (event && event.target) {
+            event.target.classList.add('active');
+        } else {
+            // Fallback untuk sidebar onclick
+            const sidebarLi = document.querySelector(`.sidebar li[onclick="showTab('${tabName}')"]`);
+            if (sidebarLi) sidebarLi.classList.add('active');
+            const mainTabBtn = document.querySelector(`.tab-btn[onclick="showTab('${tabName}')"]`);
+            if (mainTabBtn) mainTabBtn.classList.add('active');
+        }
+        document.querySelectorAll('.employee-grid').forEach(grid => grid.style.display = 'none');
+        document.getElementById(tabName + 'Tab').style.display = 'grid';
+        // Update sidebar active
+        document.querySelector('.sidebar li.active')?.classList.remove('active');
+        const sidebarActive = document.querySelector(`.sidebar li[onclick="showTab('${tabName}')"]`);
+        if (sidebarActive) sidebarActive.classList.add('active');
+    }
+
+    // Navigasi
+    function goToFormPage() {
+        showPage('formPage');
+    }
+
+    function goToMainPage() {
+        showPage('mainPage');
+        loadEmployees();
+    }
+
+    function logout() {
+        if (confirm('Apakah Anda yakin ingin logout?')) {
+            isAdminLoggedIn = false;
+            unreadChats = 0;
+            updateAdminBadge();
+            showPage('loginPage');
+        }
+    }
+
+    // Admin Functions (ditingkatkan dengan verifikasi nama + password)
+    function openAdminModal() {
+        document.getElementById('adminModal').classList.add('active');
+        document.getElementById('adminName').value = '';
+        document.getElementById('adminPassword').value = '';
+        document.getElementById('adminNameError').style.display = 'none';
+        document.getElementById('adminPasswordError').style.display = 'none';
+        document.getElementById('adminError').style.display = 'none';
+    }
+
+    function closeAdminModal() {
+        document.getElementById('adminModal').classList.remove('active');
+    }
+
+    function loginAdmin() {
+        const adminName = document.getElementById('adminName').value.trim();
+        const adminPass = document.getElementById('adminPassword').value.trim();
+        let isValid = true;
+        
+        // Reset error messages
+        document.getElementById('adminNameError').style.display = 'none';
+        document.getElementById('adminPasswordError').style.display = 'none';
+        document.getElementById('adminError').style.display = 'none';
+        
+        // Validasi nama admin
+        if (!adminName) {
+            document.getElementById('adminNameError').textContent = 'Nama admin harus diisi';
+            document.getElementById('adminNameError').style.display = 'block';
+            isValid = false;
+        } else if (adminName !== ADMIN_NAME) {
+            document.getElementById('adminNameError').textContent = 'Nama admin salah! Hanya Muhammad Fauzan yang diizinkan.';
+            document.getElementById('adminNameError').style.display = 'block';
+            isValid = false;
+        }
+        
+        // Validasi password admin
+        if (!adminPass) {
+            document.getElementById('adminPasswordError').textContent = 'Sandi admin harus diisi';
+            document.getElementById('adminPasswordError').style.display = 'block';
+            isValid = false;
+        } else if (adminPass !== ADMIN_PASSWORD) {
+            document.getElementById('adminPasswordError').textContent = 'Sandi admin salah!';
+            document.getElementById('adminPasswordError').style.display = 'block';
+            isValid = false;
+        }
+        
+        if (!isValid) return;
+        
+        // Jika valid, login sukses
+        isAdminLoggedIn = true;
+        closeAdminModal();
+        document.getElementById('adminPanelModal').classList.add('active');
+        loadChatEmployees();
+        loadAdminAnnouncements(); // Load announcements di panel
+        showToast('Login berhasil untuk Admin Utama: Muhammad Fauzan. Akses penuh aktif!', 'success');
+        // Reload employees untuk tampilkan admin controls
+        if (document.getElementById('mainPage').classList.contains('active')) {
+            loadEmployees();
+        }
+        // Reload announcements di sidebar untuk tampilkan tombol hapus
+        loadAnnouncements();
+    }
+
+    function closeAdminPanel() {
+        document.getElementById('adminPanelModal').classList.remove('active');
+    }
+
+    // Fungsi toggle status karyawan (admin only)
+    function toggleStatus(empId) {
+        if (!isAdminLoggedIn) {
+            showToast('Akses ditolak! Login sebagai admin terlebih dahulu.', 'error');
+            return;
+        }
+        const emp = employees.find(e => e.id === empId);
+        if (!emp) return;
+        emp.status = emp.status === 'active' ? 'inactive' : 'active';
+        emp.lastActivity = `Status diubah pada ${new Date().toLocaleString('id-ID')}`;
+        localStorage.setItem('employees', JSON.stringify(employees));
+        loadEmployees();
+        showToast(`Status ${emp.nama} diubah menjadi ${emp.status}!`, 'success');
+    }
+
+    // Fungsi arsip karyawan (admin only)
+    function archiveEmployee(empId) {
+        if (!isAdminLoggedIn) {
+            showToast('Akses ditolak! Login sebagai admin terlebih dahulu.', 'error');
+            return;
+        }
+        if (!confirm('Arsipkan karyawan ini?')) return;
+        const emp = employees.find(e => e.id === empId);
+        if (!emp) return;
+        emp.status = 'archived';
+        emp.lastActivity = `Diarsipkan pada ${new Date().toLocaleString('id-ID')}`;
+        localStorage.setItem('employees', JSON.stringify(employees));
+        loadEmployees();
+        showToast(`${emp.nama} berhasil diarsipkan!`, 'success');
+    }
+
+    // Broadcast info (announcement)
+    function sendBroadcast() {
+        const message = document.getElementById('broadcastMessage').value.trim();
+        if (!message) {
+            showToast('Pesan pengumuman harus diisi!', 'error');
+            return;
+        }
+        const newAnnouncement = {
+            id: Date.now(),
+            message: message,
+            time: new Date().toLocaleString('id-ID'),
+            from: 'Admin Utama (Muhammad Fauzan)'
+        };
+        announcements.unshift(newAnnouncement);
+        localStorage.setItem('announcements', JSON.stringify(announcements));
+        document.getElementById('broadcastMessage').value = '';
+        loadAnnouncements();
+        loadAdminAnnouncements(); // Update admin panel juga
+        showToast('Pengumuman berhasil dikirim ke semua karyawan!', 'success');
+        // Simulasi notif untuk user (toast)
+        setTimeout(() => showToast('Notifikasi baru: ' + message.substring(0, 50) + '...', 'success'), 500);
+    }
+
+    // Info berkala (mirip announcement tapi periodic)
+    function addPeriodicInfo() {
+        const info = document.getElementById('periodicInfo').value.trim();
+        if (!info) {
+            showToast('Info berkala harus diisi!', 'error');
+            return;
+        }
+        // Tambah ke announcements sebagai periodic
+        const newInfo = {
+            id: Date.now(),
+            message: '[INFO BERKALA] ' + info,
+            time: new Date().toLocaleString('id-ID'),
+            from: 'Admin Utama (Muhammad Fauzan)'
+        };
+        announcements.unshift(newInfo);
+        localStorage.setItem('announcements', JSON.stringify(announcements));
+        document.getElementById('periodicInfo').value = '';
+        loadAnnouncements();
+        loadAdminAnnouncements(); // Update admin panel juga
+        showToast('Info berkala ditambahkan dan akan tampil otomatis!', 'success');
+    }
+
+    // Load announcements ke sidebar (dengan tombol hapus jika admin)
+    function loadAnnouncements() {
+        const list = document.getElementById('announcementsList');
+        if (!list) return;
+        list.innerHTML = '<h4><i class="fas fa-bullhorn"></i> Pengumuman</h4>';
+        if (announcements.length === 0) {
+            list.innerHTML += '<p style="color: #a0a0a0; font-style: italic;">Tidak ada pengumuman baru</p>';
+        } else {
+            announcements.slice(0, 5).forEach(ann => { // Tampilkan 5 terbaru
+                const item = document.createElement('div');
+                item.className = 'announcement-item';
+                const deleteBtn = isAdminLoggedIn ? 
+                    `<button class="delete-ann-btn" onclick="deleteAnnouncement(${ann.id})" title="Hapus pengumuman ini"><i class="fas fa-trash"></i></button>` : 
+                    '';
+                item.innerHTML = `
+                    <div><strong>${ann.from}:</strong> ${ann.message}</div>
+                    <div class="announcement-time">${ann.time}</div>
+                    ${deleteBtn}
+                `;
+                list.appendChild(item);
+            });
+        }
+    }
+
+    // Fungsi hapus pengumuman (baru: admin only)
+    function deleteAnnouncement(id) {
+        if (!isAdminLoggedIn) {
+            showToast('Akses ditolak! Hanya admin yang bisa menghapus pengumuman.', 'error');
+            return;
+        }
+        if (!confirm('Yakin hapus pengumuman ini?')) return;
+        
+        // Filter array untuk hapus berdasarkan id
+        announcements = announcements.filter(ann => ann.id !== id);
+        localStorage.setItem('announcements', JSON.stringify(announcements));
+        
+        // Reload tampilan
+        loadAnnouncements();
+        loadAdminAnnouncements(); // Update admin panel juga
+        
+        showToast('Pengumuman berhasil dihapus!', 'success');
+    }
+
+    // Load announcements di admin panel (baru: tampilkan semua dengan tombol hapus)
+    function loadAdminAnnouncements() {
+        const list = document.getElementById('adminAnnouncementsList');
+        if (!list) return;
+        list.innerHTML = '';
+        if (announcements.length === 0) {
+            list.innerHTML = '<p style="color: #a0a0a0; font-style: italic; text-align: center;">Tidak ada pengumuman</p>';
+        } else {
+            announcements.forEach(ann => {
+                const item = document.createElement('div');
+                item.className = 'announcement-admin-item';
+                item.innerHTML = `
+                    <div><strong>${ann.from}:</strong> ${ann.message}</div>
+                    <div style="color: #a0a0a0; font-size: 0.8em;">${ann.time}</div>
+                    <button class="delete-ann-admin-btn" onclick="deleteAnnouncement(${ann.id})" title="Hapus pengumuman ini"><i class="fas fa-trash"></i></button>
+                `;
+                list.appendChild(item);
+            });
+        }
+    }
+
+  // Chat pribadi
+        function loadChatEmployees() {
+            const select = document.getElementById('chatEmployeeSelect');
+            if (!select) return;
+            select.innerHTML = '<option value="">Pilih Karyawan</option>';
+            employees.forEach(emp => {
+                const option = document.createElement('option');
+                option.value = emp.id;
+                option.textContent = emp.nama + ' (' + emp.positions[0] + ')';
+                select.appendChild(option);
+            });
+        }
+
+        function sendPrivateChat() {
+            const empId = parseInt(document.getElementById('chatEmployeeSelect').value);
+            const message = document.getElementById('chatMessage').value.trim();
+            if (!empId || !message) {
+                showToast('Pilih karyawan dan isi pesan!', 'error');
+                return;
+            }
+            if (!privateChats[empId]) privateChats[empId] = [];
+            privateChats[empId].push({
+                from: 'Admin Utama (Muhammad Fauzan)',
+                message: message,
+                time: new Date().toLocaleString('id-ID')
+            });
+            localStorage.setItem('privateChats', JSON.stringify(privateChats));
+            document.getElementById('chatMessage').value = '';
+            loadPrivateChat(empId);
+            unreadChats++;
+            updateAdminBadge();
+            showToast('Pesan pribadi terkirim ke ' + employees.find(e => e.id === empId)?.nama, 'success');
+        }
+
+        function loadPrivateChat(empId) {
+            const chatList = document.getElementById('chatList');
+            if (!chatList) return;
+            const chats = privateChats[empId] || [];
+            chatList.innerHTML = '';
+            chats.forEach(chat => {
+                const div = document.createElement('div');
+                div.className = `chat-message ${chat.from.includes('Admin') ? 'admin' : ''}`;
+                div.innerHTML = `
+                    <strong>${chat.from}:</strong> ${chat.message}
+                    <small style="display: block; color: #a0a0a0; margin-top: 5px;">${chat.time}</small>
+                `;
+                chatList.appendChild(div);
+            });
+            chatList.scrollTop = chatList.scrollHeight;
+        }
+
+        // Event listener untuk chat select (ditempatkan di luar fungsi)
+        if (document.getElementById('chatEmployeeSelect')) {
+            document.getElementById('chatEmployeeSelect').addEventListener('change', (e) => {
+                if (e.target.value) {
+                    loadPrivateChat(parseInt(e.target.value));
+                } else {
+                    document.getElementById('chatList').innerHTML = '';
+                }
+            });
+        }
+
+        // Info berkala (mirip announcement tapi periodic)
+        function addPeriodicInfo() {
+            const info = document.getElementById('periodicInfo').value.trim();
+            if (!info) {
+                showToast('Info berkala harus diisi!', 'error');
+                return;
+            }
+            // Tambah ke announcements sebagai periodic
+            const newInfo = {
+                id: Date.now(),
+                message: '[INFO BERKALA] ' + info,
+                time: new Date().toLocaleString('id-ID'),
+                from: 'Admin Utama (Muhammad Fauzan)'
+            };
+            announcements.unshift(newInfo);
+            localStorage.setItem('announcements', JSON.stringify(announcements));
+            document.getElementById('periodicInfo').value = '';
+            loadAnnouncements();
+            showToast('Info berkala ditambahkan dan akan tampil otomatis!', 'success');
+        }
+
+        // Load announcements ke sidebar
+        function loadAnnouncements() {
+            const list = document.getElementById('announcementsList');
+            if (!list) return;
+            list.innerHTML = '<h4><i class="fas fa-bullhorn"></i> Pengumuman</h4>';
+            if (announcements.length === 0) {
+                list.innerHTML += '<p style="color: #a0a0a0; font-style: italic;">Tidak ada pengumuman baru</p>';
+            } else {
+                announcements.slice(0, 5).forEach(ann => { // Tampilkan 5 terbaru
+                    const item = document.createElement('div');
+                    item.className = 'announcement-item';
+                    item.innerHTML = `
+                        <div><strong>${ann.from}:</strong> ${ann.message}</div>
+                        <div class="announcement-time">${ann.time}</div>
+                    `;
+                    list.appendChild(item);
+                });
+            }
+        }
+
+        // Update badge admin jika ada unread chats
+        function updateAdminBadge() {
+            const badge = document.getElementById('adminBadge');
+            if (!badge) return;
+            if (unreadChats > 0) {
+                badge.textContent = unreadChats > 9 ? '9+' : unreadChats;
+                badge.style.display = 'flex';
+            } else {
+                badge.style.display = 'none';
+            }
+        }
+
+        // Fungsi toast notification (ditingkatkan)
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMessage');
+            toastMsg.textContent = message;
+            toast.className = `toast ${type} auto-hide`;
+            toast.classList.add('show');
+            
+            // Auto hide setelah 3 detik
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Event listener untuk modal close on outside click
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
+        });
+
+        // Enter key untuk admin name dan password
+        if (document.getElementById('adminName')) {
+            document.getElementById('adminName').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') loginAdmin();
+            });
+        }
+        if (document.getElementById('adminPassword')) {
+            document.getElementById('adminPassword').addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') loginAdmin();
+            });
+        }
+    </script>
+</body>
+</html>
